@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Chat Messages</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles/index.css')}}">
+</head>
+<body>
+<div id="messages-container">
+    <div id="messages"></div>
+    <form id="message-form">
+        <input type="text" id="message-input" placeholder="Type your message here...">
+        <button type="submit" id="send-button">Send</button>
+        <div id="error"></div>
+    </form>
+</div>
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+<script>
+    function sendMessage(event) {
+        event.preventDefault();
+        const messageInput = document.getElementById("message-input");
+        const message = messageInput.value;
+        const messagesContainer = document.getElementById("messages");
+        const errorContainer = document.getElementById("error");
+
+        errorContainer.innerText = "";
+
+        if (message.trim() !== "") {
+            const newMessage = document.createElement("div");
+            newMessage.innerText = "User: \n" + message;
+            newMessage.classList.add("message", "sent");
+            messagesContainer.appendChild(newMessage);
+
+            messageInput.value = "";
+            $.ajax({
+                type: 'GET',
+                url: '/chat',
+                data: {input_text: message},
+                success: function (response) {
+                    const responseMessage = document.createElement("div");
+                    responseMessage.innerText = response;
+                    responseMessage.classList.add("message", "received");
+                    messagesContainer.appendChild(responseMessage);
+                },
+                error: function () {
+                    errorContainer.innerText = "Failed to send message. Please try again.";
+                }
+            });
+        }
+    }
+
+    const sendButton = document.getElementById("send-button");
+    sendButton.addEventListener("click", sendMessage);
+
+    const messageForm = document.getElementById("message-form");
+    messageForm.addEventListener("submit", sendMessage);
+</script>
+</body>
+</html>
